@@ -1,4 +1,4 @@
-package custom.redis;
+package custom.dummydb;
 
 import org.camunda.bpm.engine.identity.User;
 

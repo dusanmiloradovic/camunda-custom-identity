@@ -1,39 +1,30 @@
 package custom.camunda.identity;
 
 
-import custom.redis.CamundaGroup;
-import custom.redis.Person;
-import custom.redis.Persons;
+import custom.dummydb.CamundaGroup;
+import custom.dummydb.Person;
+import custom.dummydb.Persons;
 import org.camunda.bpm.engine.identity.*;
-import org.camunda.bpm.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.camunda.bpm.engine.impl.context.Context;
 import org.camunda.bpm.engine.impl.identity.ReadOnlyIdentityProvider;
 import org.camunda.bpm.engine.impl.interceptor.CommandContext;
-import org.camunda.bpm.engine.impl.interceptor.SessionFactory;
-import org.camunda.bpm.engine.impl.persistence.GenericManagerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.ObjectFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class ExternalIdentityProvider implements ReadOnlyIdentityProvider {
 
-    final Persons persons;
     private static final Logger log = LoggerFactory.getLogger(ExternalIdentityProvider.class);
-    private final ObjectFactory<HttpSession> httpSessionFactory;
+    final Persons persons;
 
-    public ExternalIdentityProvider(Persons persons, ObjectFactory<HttpSession> httpSessionFactory){
-        this.persons=persons;
-        this.httpSessionFactory=httpSessionFactory;
-    };
 
-    @Autowired
-    UserSession userSession;
+    public ExternalIdentityProvider(Persons persons) {
+        this.persons = persons;
+    }
+
+    ;
 
     public User findUserById(String s) {
 
@@ -58,7 +49,7 @@ public class ExternalIdentityProvider implements ReadOnlyIdentityProvider {
     }
 
     public Group findGroupById(String group) {
-        CamundaGroup cg=new CamundaGroup();
+        CamundaGroup cg = new CamundaGroup();
         cg.setId(group);
         cg.setName(group);
         return cg;
@@ -69,8 +60,7 @@ public class ExternalIdentityProvider implements ReadOnlyIdentityProvider {
     }
 
     public GroupQuery createGroupQuery(CommandContext commandContext) {
-        final HelperCamundaSession session = commandContext.getSession(HelperCamundaSession.class);
-        return new RedisGroupQuery(session);
+        return new RedisGroupQuery();
     }
 
     public Tenant findTenantById(String s) {
@@ -118,36 +108,17 @@ public class ExternalIdentityProvider implements ReadOnlyIdentityProvider {
     }
 
     public List<Group> findGroupByQueryCriteria(RedisGroupQuery query) {
-//        final ProcessEngineConfigurationImpl processEngineConfiguration = Context.getCommandContext().getProcessEngineConfiguration();
-//        Map<Class<?>, SessionFactory> sessionFactories = processEngineConfiguration.getSessionFactories();
-//        if (sessionFactories.get(HelperCamundaSession.class)==null){
-//            sessionFactories.put(HelperCamundaSession.class, new GenericManagerFactory(HelperCamundaSession.class));
-//        }
-//
-//        processEngineConfiguration.setSessionFactories(sessionFactories);
-      //  final HelperCamundaSession session = Context.getCommandContext().getSession(HelperCamundaSession.class);
-        final HttpSession session = httpSessionFactory.getObject();
-        if (query.getUserId()!=null){
-          //  session.setUserId(query.getUserId());
-            if (userSession!=null){
-                userSession.setUserId(query.getUserId());
-            }
+
+        if (query.getUserId() != null) {
             return getGroupsForUser(query.getUserId());
         }
         final List<String> allGroups = persons.getAllGroups();
         List<Group> ret = getGroups(allGroups);
 
-        if (query.getId()!=null){
-       //     log.info ("AND THE USER SESSION IS "+userSession.getUserId());
-            ret.removeIf(group->!group.getId().equals(query.getId()));
+        if (query.getId() != null) {
+            ret.removeIf(group -> !group.getId().equals(query.getId()));
         }
 
-
-        if (userSession!=null && userSession.getUserId()!=null){
-            return getGroupsForUser(userSession.getUserId());
-        }
-        //TODO this is just for development, thisk of some other way to store the camunda admin group
-       // log.info ("AND THE USER SESSION IS "+session.getUserId());
         return ret;
     }
 
@@ -160,10 +131,6 @@ public class ExternalIdentityProvider implements ReadOnlyIdentityProvider {
             cg.setName(g);
             ret.add(cg);
         }
-//        CamundaGroup cg = new CamundaGroup();
-//        cg.setId("camunda-admin");
-//        cg.setName("Admin Group");
-//        ret.add(cg);
         return ret;
     }
 

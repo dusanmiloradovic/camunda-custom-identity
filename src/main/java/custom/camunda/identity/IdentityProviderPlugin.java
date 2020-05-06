@@ -1,6 +1,6 @@
 package custom.camunda.identity;
 
-import custom.redis.Persons;
+import custom.dummydb.Persons;
 import org.camunda.bpm.engine.ProcessEngine;
 import org.camunda.bpm.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.camunda.bpm.engine.impl.cfg.ProcessEnginePlugin;
@@ -19,11 +19,9 @@ public class IdentityProviderPlugin implements ProcessEnginePlugin {
 
     private Persons persons;
 
-   private final ObjectFactory<HttpSession> httpSessionFactory;
     @Autowired
     public IdentityProviderPlugin(Persons persons,ObjectFactory<HttpSession> httpSessionFactory) {
         this.persons = persons;
-        this.httpSessionFactory=httpSessionFactory;
     }
 
 
@@ -41,7 +39,7 @@ public class IdentityProviderPlugin implements ProcessEnginePlugin {
     @Override
     public void preInit(ProcessEngineConfigurationImpl processEngineConfiguration) {
         log.info("Identity Provider plugin pre-init");
-        IdentityProviderFactory identityProviderFactory = new IdentityProviderFactory(persons,httpSessionFactory);
+        IdentityProviderFactory identityProviderFactory = new IdentityProviderFactory(persons);
         processEngineConfiguration.setIdentityProviderSessionFactory(identityProviderFactory);
 
     }

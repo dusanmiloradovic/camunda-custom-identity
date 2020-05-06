@@ -9,7 +9,7 @@ import org.camunda.bpm.engine.impl.interceptor.CommandExecutor;
 import java.util.List;
 
 public class RedisGroupQuery extends GroupQueryImpl {
-    private  HelperCamundaSession sess;
+
 
     public RedisGroupQuery(CommandExecutor commandExecutorTxRequired) {
         super(commandExecutorTxRequired);
@@ -19,10 +19,7 @@ public class RedisGroupQuery extends GroupQueryImpl {
         super();
     }
 
-    public RedisGroupQuery(HelperCamundaSession sess){
-        this.sess=sess;
-    }
-    @Override
+        @Override
     public long executeCount(CommandContext commandContext) {
 
         final List<Group> groupByQueryCriteria = getExternalIdentityProvider(commandContext).findGroupByQueryCriteria(this);
