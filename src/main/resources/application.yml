@@ -1,0 +1,10 @@
+server:
+  port: 8080
+spring:
+  redis:
+    host: ghoopapd01
+    port: 6379
+  datasource:
+    driverClassName: org.h2.Driver
+    url: jdbc:h2:file:~/camunda
+    username: sa
